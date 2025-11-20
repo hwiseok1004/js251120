@@ -1,1 +1,143 @@
-# js251120
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouse Interactive Background</title>
+    <style>
+        /* 1. 기본 설정 및 리셋 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a; /* 아주 어두운 검정 */
+            overflow: hidden; /* 스크롤 방지 */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        /* 2. 배경 텍스트 (디자인 요소) */
+        .content {
+            position: relative;
+            z-index: 10; /* 배경보다 위에 위치 */
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            pointer-events: none; /* 마우스 이벤트가 배경으로 통과되도록 설정 */
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.5);
+        }
+
+        p {
+            font-size: 1.2rem;
+            font-weight: 300;
+            opacity: 0.7;
+        }
+
+        /* 3. 빛나는 오브젝트 (마우스를 따라다닐 요소) */
+        .interactive-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            background: #0a0a0a;
+        }
+
+        .glow-ball {
+            position: absolute;
+            width: 600px;      /* 빛의 크기 */
+            height: 600px;
+            background: conic-gradient(
+                from 180deg at 50% 50%,
+                #2E00FF 0deg,    /* 파란색 */
+                #FF0080 120deg,  /* 핫핑크 */
+                #7B00FF 240deg,  /* 보라색 */
+                #2E00FF 360deg
+            );
+            border-radius: 50%;
+            filter: blur(120px); /* 강한 블러로 몽환적인 느낌 연출 */
+            opacity: 0.6;
+            
+            /* 중앙 정렬을 위해 위치 조정 (JS에서 transform으로 제어) */
+            transform: translate(-50%, -50%); 
+            will-change: transform; /* 성능 최적화 */
+            mix-blend-mode: screen; /* 배경과 자연스럽게 섞임 */
+        }
+
+        /* 4. 노이즈 텍스처 (필름 같은 질감 추가) */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            opacity: 0.07;
+            pointer-events: none;
+            background: url('https://grainy-gradients.vercel.app/noise.svg'); 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="noise-overlay"></div>
+
+    <div class="content">
+        <h1>Interactive Aura</h1>
+        <p>Move your cursor to feel the light.</p>
+    </div>
+
+    <div class="interactive-bg">
+        <div class="glow-ball" id="glowBall"></div>
+    </div>
+
+    <script>
+        const ball = document.getElementById('glowBall');
+        
+        // 현재 마우스 위치
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+
+        // 빛나는 공의 현재 위치 (부드러운 움직임을 위해 별도 저장)
+        let ballX = window.innerWidth / 2;
+        let ballY = window.innerHeight / 2;
+
+        // 1. 마우스 움직임 감지
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // 2. 애니메이션 루프 (부드러운 추적 효과 - Linear Interpolation)
+        function animate() {
+            // 목표 지점(마우스)과 현재 위치 사이의 거리를 10%씩 좁힘 (0.1)
+            // 숫자가 작을수록 더 느리고 부드럽게 따라옴
+            const speed = 0.08; 
+            
+            ballX += (mouseX - ballX) * speed;
+            ballY += (mouseY - ballY) * speed;
+
+            // 위치 업데이트
+            ball.style.transform = `translate(${ballX - 300}px, ${ballY - 300}px)`; 
+            // -300은 width/height의 절반값 (중앙 정렬 보정)
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
